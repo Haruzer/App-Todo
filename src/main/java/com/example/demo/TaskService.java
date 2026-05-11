@@ -35,5 +35,10 @@ public class TaskService {
     public void deleteById(Long id) {
         taskRepository.deleteById(id);
     }
+    
+    //検索
+    public List<Task> search(String keyword){
+    	return taskRepository.findByTitleContaining(keyword);
+    }
 
 }
