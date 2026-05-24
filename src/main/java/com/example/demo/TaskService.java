@@ -21,11 +21,14 @@ public class TaskService {
     public Task findById(Long id) {
         return taskRepository.findById(id).orElseThrow();
     }
-
+    
     // 登録・更新
     public void save(Task task) {
         if (task.getId() == null) {
             task.setCreatedAt(LocalDateTime.now());
+        } else {
+            Task existing = taskRepository.findById(task.getId()).orElseThrow();
+            task.setCreatedAt(existing.getCreatedAt());
         }
         task.setUpdatedAt(LocalDateTime.now());
         taskRepository.save(task);

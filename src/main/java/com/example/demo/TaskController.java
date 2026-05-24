@@ -2,69 +2,62 @@ package com.example.demo;
 
 import java.util.List;
 
-import jakarta.validation.Valid;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
-@RequestMapping("/tasks")
+@RestController
+@RequestMapping("/api/tasks")
 public class TaskController {
 	
 	@Autowired
 	private TaskService taskService;
 	
-	 // 一覧表示
+	 // 一覧取得・検索
     @GetMapping
-    public String list(@RequestParam(required = false) String keyword, Model model) {
-        List<Task> tasks;
+    public List<Task> list(@RequestParam (required = false)String keyword) {
         if(keyword != null && !keyword.isEmpty()) {
-        	tasks = taskService.search(keyword);
-        } else {
-        	tasks = taskService.findAll();
+        return taskService.search(keyword);
         }
-        model.addAttribute("tasks", tasks);
-        return "task/list";
+        return taskService.findAll();
     }
 
-    // 登録画面表示
-    @GetMapping("/new")
-    public String newTask(Model model) {
-        model.addAttribute("task", new Task());
-        return "task/form";
+    // 1件取得
+    @GetMapping("/{id}")
+    public Task findBy(@PathVariable Long id) {
+        return taskService.findById(id);
     }
 
     // 登録・更新処理
-    @PostMapping("/save")
-    public String save(@Valid @ModelAttribute Task task, BindingResult result) {
-    	if(result.hasErrors()) {
-    		return "task/form";
-    	}
-        taskService.save(task);
-        return "redirect:/tasks";
+    @PostMapping
+    public Task create(@RequestBody Task task) {
+    	taskService.save(task);
+        return task;
     }
+    
+    
 
-    // 編集画面表示
-    @GetMapping("/edit/{id}")
-    public String edit(@PathVariable Long id, Model model) {
-        Task task = taskService.findById(id);
-        model.addAttribute("task", task);
-        return "task/form";
+    // 更新処理
+    @PutMapping("{id}")
+    public Task update(@PathVariable Long id, @RequestBody Task task) {
+        task.setId(id);
+        taskService.save(task);
+        return taskService.findById(id);
     }
 
     // 削除処理
-    @GetMapping("/delete/{id}")
-    public String delete(@PathVariable Long id) {
+    @DeleteMapping("{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         taskService.deleteById(id);
-        return "redirect:/tasks";
+        return ResponseEntity.ok().build();
     }
 
 }
