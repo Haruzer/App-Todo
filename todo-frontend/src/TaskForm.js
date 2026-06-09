@@ -62,6 +62,8 @@ function TaskForm({ onSave, editingTask, setEditingTask }) {
               onChange={e => setTitle(e.target.value)}
               placeholder="例：API実装"
               required
+              onInvalid={e => e.target.setCustomValidity('タスク名は必須です')}
+              onInput={e => e.target.setCustomValidity('')}
             />
           </div>
           <div className="mb-3">
